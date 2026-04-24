@@ -1,0 +1,8 @@
+{
+  "dataset": "ha-vid",
+  "paths": [
+    "data/raw_videos/ha-vid",
+    "data/pose_tracks/ha-vid",
+    "data/motions/ha-vid"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "datasets": [
+    {
+      "name": "ha-vid",
+      "kind": "industrial_assembly_video",
+      "homepage": "https://iai-hrc.github.io/ha-vid",
+      "status": "external_access_required",
+      "notes": "Assembly videos with detailed human-robot shared assembly taxonomy."
+    },
+    {
+      "name": "assembly101",
+      "kind": "multi_view_assembly_video",
+      "homepage": "https://assembly-101.github.io/",
+      "status": "external_access_required",
+      "notes": "Multi-view procedural assembly videos and hand pose annotations."
+    },
+    {
+      "name": "openpack",
+      "kind": "logistics_packing_dataset",
+      "homepage": "https://open-pack.github.io/",
+      "status": "external_access_required",
+      "notes": "Packing work dataset with operation annotations and wearable/IoT signals."
+    },
+    {
+      "name": "inhard",
+      "kind": "industrial_action_recognition",
+      "homepage": "https://github.com/vhavard/InHARD",
+      "status": "external_access_required",
+      "notes": "Industrial action recognition dataset from real-world HRC settings."
+    }
+  ],
+  "local_layout": {
+    "raw_videos": "data/raw_videos/<dataset_name>/",
+    "pose_tracks": "data/pose_tracks/<dataset_name>/",
+    "motion_sequences": "data/motions/<dataset_name>/"
+  }
+}
+

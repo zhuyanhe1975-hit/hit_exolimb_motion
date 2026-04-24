@@ -1,0 +1,46 @@
+{
+  "events": [
+    {
+      "event": "prepare_support",
+      "segment_index": 0,
+      "time": 0.0,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "hold_support",
+      "segment_index": 0,
+      "time": 0.0,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "release_support",
+      "segment_index": 0,
+      "time": 3.0,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "prepare_support",
+      "segment_index": 1,
+      "time": 2.5,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "hold_support",
+      "segment_index": 1,
+      "time": 2.7,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "release_support",
+      "segment_index": 1,
+      "time": 14.3,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    }
+  ]
+}

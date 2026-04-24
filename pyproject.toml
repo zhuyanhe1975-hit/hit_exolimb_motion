@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hit-exolimb-motion"
+version = "0.1.0"
+description = "Overhead work human motion modeling and exolimb assistance planning."
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+hit-exolimb-motion = "hit_exolimb_motion.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

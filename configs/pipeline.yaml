@@ -1,0 +1,19 @@
+project:
+  name: hit_exolimb_motion
+  mode: python_native
+
+pose:
+  format: jsonl
+  coordinate_system: y_up
+  min_required_confidence: 0.4
+
+overhead_detection:
+  wrist_above_head_margin_m: 0.05
+  wrist_above_shoulder_margin_m: 0.25
+  min_duration_s: 0.4
+
+assistance:
+  support_lead_time_s: 0.2
+  release_delay_s: 0.3
+  default_support_side: auto
+

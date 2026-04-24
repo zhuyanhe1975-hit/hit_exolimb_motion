@@ -1,0 +1,13 @@
+{
+  "segments": [
+    {
+      "label": "overhead_work",
+      "start_frame": 30,
+      "end_frame": 90,
+      "start_time": 1.0,
+      "end_time": 3.0,
+      "duration": 2.0,
+      "side": "both"
+    }
+  ]
+}

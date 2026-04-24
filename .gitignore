@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+node_modules/
+dist/
+data/raw_videos/
+data/pose_tracks/
+data/motions/
+outputs/*.npz

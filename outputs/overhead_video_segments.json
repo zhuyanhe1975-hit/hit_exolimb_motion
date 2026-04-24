@@ -1,0 +1,22 @@
+{
+  "segments": [
+    {
+      "label": "overhead_panel_contact",
+      "start_frame": 0,
+      "end_frame": 81,
+      "start_time": 0.0,
+      "end_time": 2.7,
+      "duration": 2.7,
+      "side": "both"
+    },
+    {
+      "label": "exolimb_support_takeover",
+      "start_frame": 81,
+      "end_frame": 420,
+      "start_time": 2.7,
+      "end_time": 14.0,
+      "duration": 11.3,
+      "side": "both"
+    }
+  ]
+}
