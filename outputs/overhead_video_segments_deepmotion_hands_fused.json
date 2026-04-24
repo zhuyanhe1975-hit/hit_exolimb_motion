@@ -1,0 +1,31 @@
+{
+  "segments": [
+    {
+      "label": "overhead_work",
+      "start_frame": 20,
+      "end_frame": 97,
+      "start_time": 0.66666,
+      "end_time": 3.233301,
+      "duration": 2.5666409999999997,
+      "side": "both"
+    },
+    {
+      "label": "overhead_work",
+      "start_frame": 186,
+      "end_frame": 239,
+      "start_time": 6.199938,
+      "end_time": 7.9665870000000005,
+      "duration": 1.7666490000000001,
+      "side": "both"
+    },
+    {
+      "label": "overhead_work",
+      "start_frame": 271,
+      "end_frame": 329,
+      "start_time": 9.033243,
+      "end_time": 10.966557,
+      "duration": 1.9333139999999993,
+      "side": "both"
+    }
+  ]
+}

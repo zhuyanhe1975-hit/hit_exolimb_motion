@@ -1,0 +1,49 @@
+{
+  "segments": [
+    {
+      "label": "overhead_work",
+      "start_frame": 16,
+      "end_frame": 95,
+      "start_time": 0.5333333333333333,
+      "end_time": 3.1666666666666665,
+      "duration": 2.6333333333333333,
+      "side": "both"
+    },
+    {
+      "label": "overhead_work",
+      "start_frame": 186,
+      "end_frame": 221,
+      "start_time": 6.2,
+      "end_time": 7.366666666666666,
+      "duration": 1.166666666666666,
+      "side": "both"
+    },
+    {
+      "label": "overhead_work",
+      "start_frame": 223,
+      "end_frame": 233,
+      "start_time": 7.433333333333334,
+      "end_time": 7.766666666666667,
+      "duration": 0.33333333333333304,
+      "side": "both"
+    },
+    {
+      "label": "overhead_work",
+      "start_frame": 271,
+      "end_frame": 279,
+      "start_time": 9.033333333333333,
+      "end_time": 9.3,
+      "duration": 0.2666666666666675,
+      "side": "both"
+    },
+    {
+      "label": "overhead_work",
+      "start_frame": 290,
+      "end_frame": 322,
+      "start_time": 9.666666666666666,
+      "end_time": 10.733333333333333,
+      "duration": 1.0666666666666664,
+      "side": "both"
+    }
+  ]
+}

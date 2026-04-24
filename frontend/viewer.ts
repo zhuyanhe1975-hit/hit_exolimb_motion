@@ -11,8 +11,10 @@ const BONE_PAIRS = [
   ["neck", "right_shoulder"],
   ["left_shoulder", "left_elbow"],
   ["left_elbow", "left_wrist"],
+  ["left_wrist", "left_hand"],
   ["right_shoulder", "right_elbow"],
   ["right_elbow", "right_wrist"],
+  ["right_wrist", "right_hand"],
   ["pelvis", "left_hip"],
   ["pelvis", "right_hip"],
   ["left_hip", "left_knee"],
@@ -58,9 +60,7 @@ export class MotionViewer {
   private readonly primitiveCapsules: Array<{ mesh: THREE.Mesh; spec: CapsuleSpec }> = [];
   private readonly headMesh: THREE.Mesh;
   private readonly pelvisMesh: THREE.Mesh;
-  private readonly handMeshes = new Map<string, THREE.Mesh>();
   private readonly footMeshes = new Map<string, THREE.Mesh>();
-  private readonly clock = new THREE.Clock();
   private readonly supportMarker: THREE.Mesh;
   private readonly overheadBand: THREE.Mesh;
   private frames: PoseFrame[] = [];
@@ -78,10 +78,12 @@ export class MotionViewer {
     this.renderer.setClearColor(0x15191d);
     container.appendChild(this.renderer.domElement);
 
-    this.camera.position.set(2.7, 1.7, 3.1);
+    this.camera.position.set(0, 1.45, 4.2);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.target.set(0, 1.1, 0);
+    this.controls.target.set(0, 1.28, 0);
     this.controls.enableDamping = true;
+    this.controls.minPolarAngle = Math.PI * 0.48;
+    this.controls.maxPolarAngle = Math.PI * 0.56;
 
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x1d252b, 2.4));
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
@@ -90,6 +92,7 @@ export class MotionViewer {
 
     const grid = new THREE.GridHelper(4, 20, 0x34414b, 0x25313a);
     this.scene.add(grid);
+    this.avatar.group.visible = true;
     this.scene.add(this.avatar.group);
     this.avatar.load().catch((error: unknown) => {
       console.error("Failed to load AI4Animation Blueman avatar", error);
@@ -116,6 +119,11 @@ export class MotionViewer {
     this.renderFrame(0);
   }
 
+  renderLiveFrame(frame: PoseFrame) {
+    this.currentTime = frame.time;
+    this.renderFrameData(frame);
+  }
+
   setFrameCallback(callback: (frame: PoseFrame, activeSegment?: OverheadSegment) => void) {
     this.onFrameChanged = callback;
   }
@@ -132,9 +140,14 @@ export class MotionViewer {
     this.speed = value;
   }
 
+  setTime(time: number) {
+    const clamped = this.clampTime(time);
+    this.currentTime = clamped;
+    this.renderFrame(clamped);
+  }
+
   seek01(value: number) {
-    this.currentTime = this.duration * Math.min(Math.max(value, 0), 1);
-    this.renderFrame(this.currentTime);
+    this.setTime(this.duration * Math.min(Math.max(value, 0), 1));
   }
 
   getTime() {
@@ -203,14 +216,6 @@ export class MotionViewer {
     pelvisMesh.visible = false;
     this.scene.add(pelvisMesh);
 
-    const handGeometry = new THREE.SphereGeometry(0.06, 20, 16);
-    for (const name of ["left_wrist", "right_wrist"]) {
-      const mesh = new THREE.Mesh(handGeometry, accent);
-      mesh.visible = false;
-      this.handMeshes.set(name, mesh);
-      this.scene.add(mesh);
-    }
-
     const footGeometry = new THREE.BoxGeometry(0.09, 0.055, 0.18);
     for (const name of ["left_ankle", "right_ankle"]) {
       const mesh = new THREE.Mesh(footGeometry, material);
@@ -249,11 +254,6 @@ export class MotionViewer {
 
   private animate = () => {
     requestAnimationFrame(this.animate);
-    const delta = this.clock.getDelta();
-    if (this.playing && this.duration > 0) {
-      this.currentTime = (this.currentTime + delta * this.speed) % this.duration;
-      this.renderFrame(this.currentTime);
-    }
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   };
@@ -261,16 +261,21 @@ export class MotionViewer {
   private renderFrame(time: number) {
     const frame = this.frameAt(time);
     if (!frame) return;
+    this.renderFrameData(frame);
+  }
+
+  private renderFrameData(frame: PoseFrame) {
     const activeSegment = this.segments.find(
       (segment) => frame.time >= segment.start_time && frame.time <= segment.end_time,
     );
     this.overheadBand.visible = Boolean(activeSegment);
+    const useAvatar = this.avatar.isLoaded();
 
     for (const name of JOINT_NAMES) {
       const joint = frame.joints[name];
       const mesh = this.joints.get(name);
       if (!mesh) continue;
-      mesh.visible = false;
+      mesh.visible = !useAvatar && Boolean(joint);
       if (joint) mesh.position.set(joint[0], joint[1], joint[2]);
     }
 
@@ -278,7 +283,7 @@ export class MotionViewer {
       const line = this.bones[index];
       const ja = frame.joints[a];
       const jb = frame.joints[b];
-      line.visible = false;
+      line.visible = !useAvatar && Boolean(ja && jb);
       if (ja && jb) {
         const attr = line.geometry.getAttribute("position") as THREE.BufferAttribute;
         attr.setXYZ(0, ja[0], ja[1], ja[2]);
@@ -288,48 +293,55 @@ export class MotionViewer {
       }
     });
 
+    if (useAvatar) this.hidePrimitiveBody();
+    this.updatePrimitiveCharacter(frame, useAvatar);
     this.avatar.update(frame);
 
     this.updateSupportMarker(frame);
     this.onFrameChanged?.(frame, activeSegment);
   }
 
-  private updatePrimitiveCharacter(frame: PoseFrame) {
+  private updatePrimitiveCharacter(frame: PoseFrame, avatarVisible = false) {
     for (const { mesh, spec } of this.primitiveCapsules) {
       const a = frame.joints[spec.a];
       const b = frame.joints[spec.b];
-      mesh.visible = Boolean(a && b);
+      mesh.visible = !avatarVisible && Boolean(a && b);
       if (a && b) this.placeCapsule(mesh, a, b, spec.radius);
     }
 
     const head = frame.joints.head;
-    this.headMesh.visible = Boolean(head);
+    this.headMesh.visible = !avatarVisible && Boolean(head);
     if (head) {
       this.headMesh.position.set(head[0], head[1], head[2] + 0.015);
       this.headMesh.rotation.set(-0.18, 0, 0);
     }
 
     const pelvis = frame.joints.pelvis;
-    this.pelvisMesh.visible = Boolean(pelvis);
+    this.pelvisMesh.visible = !avatarVisible && Boolean(pelvis);
     if (pelvis) {
       this.pelvisMesh.position.set(pelvis[0], pelvis[1], pelvis[2]);
       this.pelvisMesh.rotation.set(0.18, 0, 0);
     }
 
-    for (const [name, mesh] of this.handMeshes) {
-      const joint = frame.joints[name];
-      mesh.visible = Boolean(joint);
-      if (joint) mesh.position.set(joint[0], joint[1], joint[2]);
-    }
-
     for (const [name, mesh] of this.footMeshes) {
       const joint = frame.joints[name];
-      mesh.visible = Boolean(joint);
+      mesh.visible = !avatarVisible && Boolean(joint);
       if (joint) {
         const side = name.startsWith("left") ? -1 : 1;
         mesh.position.set(joint[0] + side * 0.012, joint[1] - 0.02, joint[2] + 0.055);
         mesh.rotation.set(0.08, 0, side * 0.05);
       }
+    }
+  }
+
+  private hidePrimitiveBody() {
+    for (const { mesh } of this.primitiveCapsules) {
+      mesh.visible = false;
+    }
+    this.headMesh.visible = false;
+    this.pelvisMesh.visible = false;
+    for (const mesh of this.footMeshes.values()) {
+      mesh.visible = false;
     }
   }
 
@@ -356,6 +368,11 @@ export class MotionViewer {
       best = frame;
     }
     return best;
+  }
+
+  private clampTime(time: number) {
+    if (this.duration <= 0) return 0;
+    return Math.min(Math.max(time, 0), this.duration);
   }
 
   private updateSupportMarker(frame: PoseFrame) {

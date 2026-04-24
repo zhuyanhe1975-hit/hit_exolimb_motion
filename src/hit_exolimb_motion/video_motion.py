@@ -11,13 +11,22 @@ from .skeleton import PoseFrame, Vector3
 @dataclass(frozen=True)
 class KeyPose:
     time: float
-    left_wrist: Vector3
-    right_wrist: Vector3
+    pelvis: Vector3
+    spine: Vector3
+    neck: Vector3
+    head: Vector3
+    left_shoulder: Vector3
+    right_shoulder: Vector3
     left_elbow: Vector3
     right_elbow: Vector3
-    head: Vector3 = (0.0, 1.68, 0.0)
-    spine: Vector3 = (0.0, 1.25, 0.0)
-    pelvis: Vector3 = (0.0, 0.95, 0.0)
+    left_wrist: Vector3
+    right_wrist: Vector3
+    left_hip: Vector3 = (-0.12, 0.91, 0.0)
+    right_hip: Vector3 = (0.12, 0.91, 0.0)
+    left_knee: Vector3 = (-0.12, 0.48, 0.01)
+    right_knee: Vector3 = (0.12, 0.48, 0.01)
+    left_ankle: Vector3 = (-0.12, 0.05, 0.0)
+    right_ankle: Vector3 = (0.12, 0.05, 0.0)
 
 
 def probe_video_duration(video: Path) -> float:
@@ -40,61 +49,7 @@ def probe_video_duration(video: Path) -> float:
 
 def generate_overhead_panel_motion(video: Path, fps: int = 30) -> list[PoseFrame]:
     duration = probe_video_duration(video)
-    keyposes = [
-        # Hands start high in the provided video and touch the overhead panel.
-        KeyPose(
-            time=0.0,
-            left_wrist=(-0.28, 1.95, 0.10),
-            right_wrist=(0.28, 1.95, 0.10),
-            left_elbow=(-0.32, 1.73, 0.04),
-            right_elbow=(0.32, 1.73, 0.04),
-            head=(0.0, 1.68, -0.02),
-        ),
-        KeyPose(
-            time=1.3,
-            left_wrist=(-0.30, 2.03, 0.04),
-            right_wrist=(0.30, 2.03, 0.04),
-            left_elbow=(-0.34, 1.76, 0.02),
-            right_elbow=(0.34, 1.76, 0.02),
-            head=(0.0, 1.70, 0.0),
-        ),
-        # Exolimb takes support; human hands begin to leave the panel.
-        KeyPose(
-            time=2.7,
-            left_wrist=(-0.26, 1.82, 0.08),
-            right_wrist=(0.26, 1.82, 0.08),
-            left_elbow=(-0.32, 1.58, 0.06),
-            right_elbow=(0.32, 1.58, 0.06),
-            head=(0.0, 1.68, 0.02),
-        ),
-        KeyPose(
-            time=4.2,
-            left_wrist=(-0.16, 1.38, 0.20),
-            right_wrist=(0.16, 1.38, 0.20),
-            left_elbow=(-0.24, 1.30, 0.11),
-            right_elbow=(0.24, 1.30, 0.11),
-            head=(0.0, 1.66, 0.04),
-        ),
-        # Hands work around chest/front area while the device remains overhead.
-        KeyPose(
-            time=7.0,
-            left_wrist=(-0.14, 1.22, 0.24),
-            right_wrist=(0.14, 1.28, 0.24),
-            left_elbow=(-0.24, 1.22, 0.10),
-            right_elbow=(0.24, 1.25, 0.10),
-            head=(0.0, 1.62, 0.06),
-        ),
-        # User looks down and relaxes the arms.
-        KeyPose(
-            time=duration,
-            left_wrist=(-0.16, 1.04, 0.10),
-            right_wrist=(0.17, 1.10, 0.12),
-            left_elbow=(-0.22, 1.18, 0.04),
-            right_elbow=(0.22, 1.18, 0.04),
-            head=(0.0, 1.55, 0.08),
-            spine=(0.0, 1.22, 0.02),
-        ),
-    ]
+    keyposes = _build_keyposes(duration)
     total = int(round(duration * fps))
     frames: list[PoseFrame] = []
     for i in range(total + 1):
@@ -107,25 +62,162 @@ def generate_overhead_panel_motion(video: Path, fps: int = 30) -> list[PoseFrame
 
 
 def video_overhead_segments(duration: float) -> list[dict[str, object]]:
+    work_end = min(duration, 12.2)
     return [
         {
             "label": "overhead_panel_contact",
-            "start_frame": 0,
-            "end_frame": int(2.7 * 30),
-            "start_time": 0.0,
-            "end_time": 2.7,
-            "duration": 2.7,
+            "start_frame": int(1.0 * 30),
+            "end_frame": int(3.0 * 30),
+            "start_time": 1.0,
+            "end_time": 3.0,
+            "duration": 2.0,
             "side": "both",
         },
         {
-            "label": "exolimb_support_takeover",
-            "start_frame": int(2.7 * 30),
-            "end_frame": int(min(duration, 14.0) * 30),
-            "start_time": 2.7,
-            "end_time": min(duration, 14.0),
-            "duration": min(duration, 14.0) - 2.7,
+            "label": "overhead_tool_operation",
+            "start_frame": int(7.1 * 30),
+            "end_frame": int(work_end * 30),
+            "start_time": 7.1,
+            "end_time": work_end,
+            "duration": work_end - 7.1,
             "side": "both",
         },
+    ]
+
+
+def _build_keyposes(duration: float) -> list[KeyPose]:
+    end_time = max(duration, 14.7)
+    return [
+        KeyPose(
+            time=0.0,
+            pelvis=(0.0, 0.95, 0.03),
+            spine=(0.0, 1.23, 0.07),
+            neck=(0.0, 1.50, 0.07),
+            head=(0.0, 1.63, 0.10),
+            left_shoulder=(-0.20, 1.45, 0.04),
+            right_shoulder=(0.20, 1.45, 0.04),
+            left_elbow=(-0.27, 1.08, 0.18),
+            right_elbow=(0.27, 1.08, 0.18),
+            left_wrist=(-0.25, 0.74, 0.26),
+            right_wrist=(0.25, 0.74, 0.26),
+        ),
+        KeyPose(
+            time=0.8,
+            pelvis=(0.0, 0.95, 0.01),
+            spine=(0.0, 1.24, 0.03),
+            neck=(0.0, 1.52, 0.03),
+            head=(0.0, 1.66, 0.04),
+            left_shoulder=(-0.21, 1.47, 0.01),
+            right_shoulder=(0.21, 1.47, 0.01),
+            left_elbow=(-0.26, 1.32, 0.08),
+            right_elbow=(0.26, 1.32, 0.08),
+            left_wrist=(-0.20, 1.03, 0.06),
+            right_wrist=(0.20, 1.03, 0.06),
+        ),
+        KeyPose(
+            time=1.35,
+            pelvis=(0.0, 0.96, -0.01),
+            spine=(0.0, 1.28, -0.02),
+            neck=(0.0, 1.56, -0.01),
+            head=(0.0, 1.75, 0.0),
+            left_shoulder=(-0.22, 1.50, -0.01),
+            right_shoulder=(0.22, 1.50, -0.01),
+            left_elbow=(-0.23, 1.74, 0.02),
+            right_elbow=(0.23, 1.74, 0.02),
+            left_wrist=(-0.16, 2.10, 0.02),
+            right_wrist=(0.16, 2.10, 0.02),
+        ),
+        KeyPose(
+            time=2.9,
+            pelvis=(0.0, 0.96, -0.01),
+            spine=(0.0, 1.28, -0.02),
+            neck=(0.0, 1.56, -0.01),
+            head=(0.0, 1.74, 0.02),
+            left_shoulder=(-0.22, 1.50, -0.01),
+            right_shoulder=(0.22, 1.50, -0.01),
+            left_elbow=(-0.22, 1.75, 0.03),
+            right_elbow=(0.22, 1.75, 0.03),
+            left_wrist=(-0.14, 2.11, 0.03),
+            right_wrist=(0.14, 2.11, 0.03),
+        ),
+        KeyPose(
+            time=4.1,
+            pelvis=(0.0, 0.95, 0.0),
+            spine=(0.0, 1.24, 0.0),
+            neck=(0.0, 1.51, 0.02),
+            head=(0.0, 1.66, 0.04),
+            left_shoulder=(-0.19, 1.44, 0.01),
+            right_shoulder=(0.19, 1.44, 0.01),
+            left_elbow=(-0.18, 1.12, 0.06),
+            right_elbow=(0.18, 1.12, 0.06),
+            left_wrist=(-0.13, 0.86, 0.08),
+            right_wrist=(0.12, 0.84, 0.08),
+        ),
+        KeyPose(
+            time=5.6,
+            pelvis=(0.0, 0.95, 0.01),
+            spine=(0.0, 1.23, 0.04),
+            neck=(0.0, 1.52, 0.06),
+            head=(0.0, 1.67, 0.08),
+            left_shoulder=(-0.18, 1.44, 0.05),
+            right_shoulder=(0.18, 1.44, 0.05),
+            left_elbow=(-0.13, 1.33, 0.12),
+            right_elbow=(0.15, 1.36, 0.12),
+            left_wrist=(-0.05, 1.62, 0.14),
+            right_wrist=(0.11, 1.76, 0.14),
+        ),
+        KeyPose(
+            time=7.2,
+            pelvis=(0.0, 0.96, -0.01),
+            spine=(0.0, 1.28, 0.0),
+            neck=(0.0, 1.56, 0.02),
+            head=(0.0, 1.74, 0.04),
+            left_shoulder=(-0.18, 1.48, 0.02),
+            right_shoulder=(0.18, 1.48, 0.02),
+            left_elbow=(-0.06, 1.62, 0.08),
+            right_elbow=(0.17, 1.72, 0.08),
+            left_wrist=(0.01, 1.93, 0.08),
+            right_wrist=(0.13, 2.13, 0.06),
+        ),
+        KeyPose(
+            time=9.8,
+            pelvis=(0.0, 0.96, -0.01),
+            spine=(0.0, 1.28, 0.0),
+            neck=(0.0, 1.56, 0.02),
+            head=(0.0, 1.74, 0.05),
+            left_shoulder=(-0.18, 1.48, 0.02),
+            right_shoulder=(0.18, 1.48, 0.02),
+            left_elbow=(-0.05, 1.64, 0.08),
+            right_elbow=(0.16, 1.73, 0.08),
+            left_wrist=(0.02, 1.97, 0.07),
+            right_wrist=(0.12, 2.14, 0.05),
+        ),
+        KeyPose(
+            time=12.0,
+            pelvis=(0.0, 0.95, 0.01),
+            spine=(0.0, 1.23, 0.05),
+            neck=(0.0, 1.51, 0.06),
+            head=(0.0, 1.66, 0.08),
+            left_shoulder=(-0.17, 1.43, 0.05),
+            right_shoulder=(0.17, 1.43, 0.05),
+            left_elbow=(-0.14, 1.14, 0.11),
+            right_elbow=(0.14, 1.13, 0.11),
+            left_wrist=(-0.11, 0.84, 0.12),
+            right_wrist=(0.10, 0.82, 0.12),
+        ),
+        KeyPose(
+            time=end_time,
+            pelvis=(0.0, 0.95, 0.0),
+            spine=(0.0, 1.22, 0.01),
+            neck=(0.0, 1.50, 0.01),
+            head=(0.0, 1.64, 0.02),
+            left_shoulder=(-0.16, 1.41, 0.01),
+            right_shoulder=(0.16, 1.41, 0.01),
+            left_elbow=(-0.14, 0.99, 0.03),
+            right_elbow=(0.14, 1.00, 0.03),
+            left_wrist=(-0.13, 0.60, 0.03),
+            right_wrist=(0.12, 0.61, 0.03),
+        ),
     ]
 
 
@@ -141,38 +233,46 @@ def _surrounding_keyposes(keyposes: list[KeyPose], time: float) -> tuple[KeyPose
 def _blend_keypose(a: KeyPose, b: KeyPose, alpha: float) -> KeyPose:
     return KeyPose(
         time=a.time + (b.time - a.time) * alpha,
-        left_wrist=_lerp3(a.left_wrist, b.left_wrist, alpha),
-        right_wrist=_lerp3(a.right_wrist, b.right_wrist, alpha),
+        pelvis=_lerp3(a.pelvis, b.pelvis, alpha),
+        spine=_lerp3(a.spine, b.spine, alpha),
+        neck=_lerp3(a.neck, b.neck, alpha),
+        head=_lerp3(a.head, b.head, alpha),
+        left_shoulder=_lerp3(a.left_shoulder, b.left_shoulder, alpha),
+        right_shoulder=_lerp3(a.right_shoulder, b.right_shoulder, alpha),
         left_elbow=_lerp3(a.left_elbow, b.left_elbow, alpha),
         right_elbow=_lerp3(a.right_elbow, b.right_elbow, alpha),
-        head=_lerp3(a.head, b.head, alpha),
-        spine=_lerp3(a.spine, b.spine, alpha),
-        pelvis=_lerp3(a.pelvis, b.pelvis, alpha),
+        left_wrist=_lerp3(a.left_wrist, b.left_wrist, alpha),
+        right_wrist=_lerp3(a.right_wrist, b.right_wrist, alpha),
+        left_hip=_lerp3(a.left_hip, b.left_hip, alpha),
+        right_hip=_lerp3(a.right_hip, b.right_hip, alpha),
+        left_knee=_lerp3(a.left_knee, b.left_knee, alpha),
+        right_knee=_lerp3(a.right_knee, b.right_knee, alpha),
+        left_ankle=_lerp3(a.left_ankle, b.left_ankle, alpha),
+        right_ankle=_lerp3(a.right_ankle, b.right_ankle, alpha),
     )
 
 
 def _make_frame(index: int, time: float, pose: KeyPose) -> PoseFrame:
-    shoulder_y = 1.48
     return PoseFrame(
         frame=index,
         time=time,
         joints={
             "pelvis": pose.pelvis,
             "spine": pose.spine,
-            "neck": (0.0, 1.52, 0.0),
+            "neck": pose.neck,
             "head": pose.head,
-            "left_shoulder": (-0.22, shoulder_y, 0.0),
-            "right_shoulder": (0.22, shoulder_y, 0.0),
+            "left_shoulder": pose.left_shoulder,
+            "right_shoulder": pose.right_shoulder,
             "left_elbow": pose.left_elbow,
             "right_elbow": pose.right_elbow,
             "left_wrist": pose.left_wrist,
             "right_wrist": pose.right_wrist,
-            "left_hip": (-0.14, 0.92, 0.0),
-            "right_hip": (0.14, 0.92, 0.0),
-            "left_knee": (-0.14, 0.5, 0.02),
-            "right_knee": (0.14, 0.5, 0.02),
-            "left_ankle": (-0.14, 0.08, 0.0),
-            "right_ankle": (0.14, 0.08, 0.0),
+            "left_hip": pose.left_hip,
+            "right_hip": pose.right_hip,
+            "left_knee": pose.left_knee,
+            "right_knee": pose.right_knee,
+            "left_ankle": pose.left_ankle,
+            "right_ankle": pose.right_ankle,
         },
     )
 
@@ -188,4 +288,3 @@ def _lerp3(a: Vector3, b: Vector3, alpha: float) -> Vector3:
 def _smoothstep(x: float) -> float:
     x = max(0.0, min(1.0, x))
     return x * x * (3.0 - 2.0 * x)
-

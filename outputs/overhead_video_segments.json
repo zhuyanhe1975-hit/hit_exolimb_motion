@@ -1,21 +1,30 @@
 {
   "segments": [
     {
-      "label": "overhead_panel_contact",
-      "start_frame": 0,
-      "end_frame": 81,
-      "start_time": 0.0,
-      "end_time": 2.7,
-      "duration": 2.7,
+      "label": "overhead_work",
+      "start_frame": 15,
+      "end_frame": 95,
+      "start_time": 0.5,
+      "end_time": 3.1666666666666665,
+      "duration": 2.6666666666666665,
       "side": "both"
     },
     {
-      "label": "exolimb_support_takeover",
-      "start_frame": 81,
-      "end_frame": 420,
-      "start_time": 2.7,
-      "end_time": 14.0,
-      "duration": 11.3,
+      "label": "overhead_work",
+      "start_frame": 187,
+      "end_frame": 237,
+      "start_time": 6.233333333333333,
+      "end_time": 7.9,
+      "duration": 1.666666666666667,
+      "side": "both"
+    },
+    {
+      "label": "overhead_work",
+      "start_frame": 271,
+      "end_frame": 327,
+      "start_time": 9.033333333333333,
+      "end_time": 10.9,
+      "duration": 1.8666666666666671,
       "side": "both"
     }
   ]

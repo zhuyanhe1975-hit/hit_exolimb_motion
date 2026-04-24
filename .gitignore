@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 node_modules/
 dist/
+tmp/
 data/raw_videos/
 data/pose_tracks/
 data/motions/

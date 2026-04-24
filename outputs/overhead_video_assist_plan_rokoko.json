@@ -1,0 +1,67 @@
+{
+  "events": [
+    {
+      "event": "prepare_support",
+      "segment_index": 0,
+      "time": 0.3333333333333333,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "hold_support",
+      "segment_index": 0,
+      "time": 0.5333333333333333,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "release_support",
+      "segment_index": 0,
+      "time": 3.4666666666666663,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "prepare_support",
+      "segment_index": 1,
+      "time": 6.0,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "hold_support",
+      "segment_index": 1,
+      "time": 6.2,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "release_support",
+      "segment_index": 1,
+      "time": 8.200000000000001,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "prepare_support",
+      "segment_index": 2,
+      "time": 8.833333333333334,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "hold_support",
+      "segment_index": 2,
+      "time": 9.033333333333333,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    },
+    {
+      "event": "release_support",
+      "segment_index": 2,
+      "time": 11.200000000000001,
+      "target": "overhead_tool_or_workpiece",
+      "side": "both"
+    }
+  ]
+}

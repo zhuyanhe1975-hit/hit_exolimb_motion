@@ -80,6 +80,10 @@ select {
   gap: 10px;
 }
 
+.section:first-child .status {
+  min-height: 62px;
+}
+
 .section h2 {
   margin: 0;
   color: #f4f7fa;
@@ -246,4 +250,3 @@ select {
     border-top: 1px solid #27313a;
   }
 }
-

@@ -96,6 +96,131 @@ This scaffold does not vendor heavy pose models. Add one of these behind `src/hi
 - WHAM / 4D-Humans / HybrIK: SMPL-style 3D body reconstruction.
 - OpenPose: useful if legacy 2D keypoint JSON already exists.
 
+## Mature Video-To-Pose Path
+
+For real video alignment, prefer an off-the-shelf pose extractor instead of hand-authored keyframes.
+
+The repository now includes a MediaPipe Pose Landmarker entrypoint:
+
+```bash
+uv run python -m hit_exolimb_motion.cli extract-mediapipe-pose \
+  --video overhead.mp4 \
+  --model /path/to/pose_landmarker_full.task \
+  --out data/overhead_video/pose.jsonl
+```
+
+Then continue with the existing pipeline:
+
+```bash
+uv run python -m hit_exolimb_motion.cli detect-overhead \
+  --input data/overhead_video/pose.jsonl \
+  --out outputs/overhead_video_segments.json
+
+uv run python -m hit_exolimb_motion.cli plan-assist \
+  --segments outputs/overhead_video_segments.json \
+  --out outputs/overhead_video_assist_plan.json
+```
+
+Recommended backend choice:
+
+- MediaPipe Pose Landmarker for the fastest single-person baseline with video and world-coordinate outputs.
+- MMPose when you want a stronger configurable 2D/3D research stack.
+- WHAM or 4D-Humans when you need temporally coherent SMPL-style 3D body motion.
+
+## DeepMotion BVH Path
+
+If a stable motion track has already been produced by DeepMotion, you can convert
+its exported `BVH` file into this repo's `pose.jsonl` format:
+
+```bash
+uv run python -m hit_exolimb_motion.cli import-bvh-motion \
+  --input outputs/deepmotion/overhead_deepmotion.bvh \
+  --out data/overhead_video/pose_deepmotion.jsonl
+```
+
+Then reuse the existing downstream pipeline:
+
+```bash
+uv run python -m hit_exolimb_motion.cli detect-overhead \
+  --input data/overhead_video/pose_deepmotion.jsonl \
+  --out outputs/overhead_video_segments_deepmotion.json
+
+uv run python -m hit_exolimb_motion.cli plan-assist \
+  --segments outputs/overhead_video_segments_deepmotion.json \
+  --out outputs/overhead_video_assist_plan_deepmotion.json
+```
+
+## Apple Vision Offline MP4 Path
+
+For this Mac-first workflow, the preferred local path is now:
+
+```text
+MP4 video
+  -> Apple Vision body pose extraction
+  -> pose.jsonl
+  -> overhead segment detection
+  -> exolimb support events
+  -> frontend synchronized playback
+```
+
+Run the full offline pipeline with one command:
+
+```bash
+uv run python -m hit_exolimb_motion.cli analyze-apple-vision-video \
+  --video public/assets/videos/overhead.mp4 \
+  --pose-out data/overhead_video/pose_apple_vision.jsonl \
+  --stabilized-out data/overhead_video/pose_apple_vision_stabilized.jsonl \
+  --segments-out outputs/overhead_video_segments_apple_vision.json \
+  --assist-out outputs/overhead_video_assist_plan_apple_vision.json
+```
+
+The defaults are tuned for the current overhead-work MP4:
+
+- Apple Vision confidence threshold: `0.0`
+- overhead head margin: `-0.05`
+- overhead shoulder margin: `0.1`
+
+The stabilized output applies:
+
+- temporal smoothing
+- fixed bone-length reconstruction
+- simple kinematic chain constraints for arms and legs
+
+The stabilized Apple Vision output is available as an experimental offline post-process. The frontend currently defaults to the raw Apple Vision output until the constrained retargeting stage is improved.
+
+## MMPose Integration
+
+MMPose's official inferencer can save predictions to JSON with `pred_out_dir`, and this repo can now convert that JSON into `pose.jsonl`.
+
+Example workflow:
+
+```bash
+# Run MMPose on a compatible Linux / GPU environment
+python demo/inferencer_demo.py overhead.mp4 \
+  --pose2d human \
+  --pred-out-dir predictions
+
+# Convert the exported JSON in this repo
+uv run python -m hit_exolimb_motion.cli import-mmpose-predictions \
+  --input predictions/overhead.json \
+  --fps 30 \
+  --out data/overhead_video/pose.jsonl
+```
+
+Then reuse the same downstream commands:
+
+```bash
+uv run python -m hit_exolimb_motion.cli detect-overhead \
+  --input data/overhead_video/pose.jsonl \
+  --out outputs/overhead_video_segments.json
+
+uv run python -m hit_exolimb_motion.cli plan-assist \
+  --segments outputs/overhead_video_segments.json \
+  --out outputs/overhead_video_assist_plan.json
+```
+
+Note: on this local macOS arm64 machine, official MMPose inference is currently blocked by missing compiled `mmcv` ops (`mmcv._ext`). The importer above lets us still use official MMPose outputs without changing the rest of the stack.
+
 ## AI4Animation / AI4AnimationPy Integration
 
 Use AI4AnimationPy as the motion processing backend when available:

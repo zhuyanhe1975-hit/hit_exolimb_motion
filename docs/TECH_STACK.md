@@ -13,6 +13,12 @@
 - MMPose for configurable 2D/3D pose pipelines.
 - WHAM, 4D-Humans, HybrIK, or VIBE for SMPL-like body reconstruction from video.
 
+Preferred order for this repo:
+
+1. MediaPipe Pose Landmarker for single-person baseline extraction from local videos.
+2. MMPose RTMPose or MotionBERT when higher-quality 2D/3D inference is needed.
+3. WHAM or 4D-Humans when we need temporally coherent 3D body motion instead of sparse joints.
+
 ### Motion modeling
 
 - AI4AnimationPy for Python-native motion import, processing, training, and rendering.
@@ -39,4 +45,3 @@
 4. Generate exolimb support events.
 5. Add an exolimb kinematic model and collision checks.
 6. Train assistance timing and support-point policies.
-
