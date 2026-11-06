@@ -2,16 +2,17 @@ import "./styles.css";
 import { loadAssistEvents, loadPoseJsonl, loadSegments } from "./data";
 import { analyzeMp4UpperBody } from "./mediapipeVideo";
 import { probeMujocoWasm } from "./mujoco";
+import { publicAsset } from "./publicUrl";
 import type { AssistEvent, OverheadSegment, PoseFrame } from "./types";
 import { MotionViewer } from "./viewer";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error("Missing #app");
 
-const DEFAULT_POSE_URL = "/data/overhead_video/pose_rokoko.jsonl";
-const DEFAULT_SEGMENTS_URL = "/outputs/overhead_video_segments_rokoko.json";
-const DEFAULT_ASSIST_URL = "/outputs/overhead_video_assist_plan_rokoko.json";
-const DEFAULT_VIDEO_URL = "/assets/videos/overhead.mp4";
+const DEFAULT_POSE_URL = publicAsset("/data/overhead_video/pose_rokoko.jsonl");
+const DEFAULT_SEGMENTS_URL = publicAsset("/outputs/overhead_video_segments_rokoko.json");
+const DEFAULT_ASSIST_URL = publicAsset("/outputs/overhead_video_assist_plan_rokoko.json");
+const DEFAULT_VIDEO_URL = publicAsset("/assets/videos/overhead.mp4");
 
 app.innerHTML = `
   <main class="app">
@@ -28,7 +29,9 @@ app.innerHTML = `
         <div class="controls">
           <button id="analyze-mp4" class="button primary" type="button">Analyze MP4 In Browser</button>
         </div>
-        <div id="analysis-status" class="status">Using local Rokoko Vision body motion with exported hand skeleton by default. Browser MediaPipe analysis remains optional and experimental.</div>
+        <div class="status">This page plays the precomputed Rokoko overhead sequence shipped with the site. No Python, GPU, or training server is required.</div>
+        <div id="analysis-status" class="status">Loading the precomputed pose, overhead segments, and exolimb assist plan.</div>
+        <div class="status">Analyze MP4 is optional. It runs MediaPipe in this browser and downloads public model files. It does not call a project backend. If it fails, the precomputed motion stays available.</div>
       </section>
 
       <section class="section">
@@ -172,6 +175,11 @@ timeline.addEventListener("pointerup", () => {
 timeline.addEventListener("input", () => {
   const value = Number(timeline.value) / 1000;
   const targetTime = viewer.getDuration() * value;
+  // Ignore the echo when video sync writes the same slider position back.
+  if (Math.abs(referenceVideo.currentTime - targetTime) < 0.04) {
+    viewer.setTime(targetTime);
+    return;
+  }
   referenceVideo.currentTime = targetTime;
   viewer.setTime(targetTime);
 });
@@ -186,10 +194,6 @@ referenceVideo.addEventListener("pause", () => {
   viewer.setPlaying(false);
   playToggle.textContent = "Play";
   stopVideoSyncLoop();
-  syncViewerToVideo();
-});
-
-referenceVideo.addEventListener("seeking", () => {
   syncViewerToVideo();
 });
 
@@ -269,7 +273,7 @@ async function boot() {
   try {
     const offline = await loadFromJsonFallback();
     analysisStatus.className = "status ready";
-    analysisStatus.textContent = `Loaded local Rokoko Vision motion: ${offline.frames.length} frames, ${offline.segments.length} overhead segments.`;
+    analysisStatus.textContent = `Loaded precomputed Rokoko Vision motion: ${offline.frames.length} frames, ${offline.segments.length} overhead segments.`;
     await applySequence(offline.frames, offline.segments, offline.events);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

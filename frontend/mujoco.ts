@@ -5,8 +5,8 @@ export type MujocoRuntimeStatus = {
 
 export async function probeMujocoWasm(): Promise<MujocoRuntimeStatus> {
   return {
-    available: true,
+    available: false,
     message:
-      "@mujoco/mujoco is installed. The current viewer uses Three.js for pose playback; MJCF loading should be added as an isolated MuJoCo worker so robot/exolimb models do not block the motion UI.",
+      "MuJoCo physics is not running on this page. The viewer is Three.js playback of precomputed pose data. An MJCF exolimb simulation is not part of this static demo and is not required to watch the sequence.",
   };
 }

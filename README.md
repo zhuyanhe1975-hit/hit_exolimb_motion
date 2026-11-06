@@ -52,7 +52,15 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL and load the default demo sequence from:
+Open the Vite URL. Production and local builds use the GitHub Pages project base path `/hit_exolimb_motion/`.
+
+The static demo is intended for GitHub Pages:
+
+https://zhuyanhe1975-hit.github.io/hit_exolimb_motion/
+
+That page plays the precomputed Rokoko sequence (pose, overhead segments, and exolimb assist events), the reference overhead video, and the AI4Animation worker mesh. It does not start the Python pipeline, a GPU trainer, or MuJoCo. The optional in-browser MediaPipe button downloads public model files; if that step fails, the precomputed sequence still plays.
+
+Default files:
 
 - `data/demo/overhead_pose.jsonl`
 - `outputs/demo_segments.json`
