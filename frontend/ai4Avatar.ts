@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { CCDIKSolver, type IK } from "three/examples/jsm/animation/CCDIKSolver.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { publicAsset } from "./publicUrl";
 import type { PoseFrame, Vec3 } from "./types";
 
 export class AI4BluemanAvatar {
@@ -60,7 +61,7 @@ export class AI4BluemanAvatar {
     "b_r_pinky3",
   ];
 
-  async load(url = "/assets/human/ai4animation/worker.glb") {
+  async load(url = publicAsset("/assets/human/ai4animation/worker.glb")) {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync(url);
     const object = gltf.scene;
